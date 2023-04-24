@@ -17,7 +17,6 @@ class Map_room:
             else:
                 playMap.append(playMapRow)
         return playMap
-    
 
     def print_map(self):
         for i in self.map:
@@ -28,6 +27,9 @@ class Map_room:
                 else:
                     string += 'X'
             print(string)
+    
+    def editMap(self, edit_coord):
+        pass
 
     def __init__(self):
         self.map = self.generate_map()

@@ -106,12 +106,13 @@ def main():
                     distance_Y = getDistance(player.y, destination_Y, False)
             else:
                 cursor_color=red
+        
         #Move character and update destination
         move = movePlayer(player, distance_X, distance_Y)
         distance_X = move[0]
         distance_Y = move[1]
 
-        clock.tick(30)
+        clock.tick(30)#framerate
         draw(player, cursor, cursor_color) #Draw current frame
     
     #While loop breaks -> Game closes
