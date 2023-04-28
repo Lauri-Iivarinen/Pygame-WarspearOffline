@@ -1,22 +1,57 @@
+
+from Mob import Mob
+
+
+maps = {
+    '1': [
+        ['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'],
+        ['X', 'X', 'X', 'X', 'X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'X'],
+        ['X', 'X', 'X', 'X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'X'],
+        ['X', 'X', 'X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'X'],
+        ['X', 'X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'X'],
+        ['X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'X'],
+        ['X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'X'],
+        ['X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'X'],
+        ['X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'X'],
+        ['X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'X'],
+        ['X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'X'],
+        ['X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'X'],
+        ['X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'X'],
+        ['X', 'X', 'X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'X'],
+        ['X', 'X', 'X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'X'],
+        ['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'],
+]
+}
+
+mobs = {
+    '1': [
+        Mob(False, 100, 'One Eyed Jack', 0, [], 200, 80, (100,100,255)),
+        Mob(True, 100, ' Goblin', 20, [], 600, 400, (50,150,50)),
+    ]
+}
+
+def getMobs(roomNum):
+    return mobs[f'{roomNum}']
+
+def getRoom(roomNum):
+    return maps[f'{roomNum}']
+
+
 class Map_room:
-    
-    def generate_map(self):
-        playMapRow = []
-        playMap = []
-        for i in  range(0,21):
-            if i==0 or i== 20:
-                playMapRow.append(False)
-            else:
-                playMapRow.append(True)
-        for i in range(0,16):
-            if i==0 or i==15:
-                row=[]
-                for a in range(0,21):
+
+    def get_map(self, mapNum):
+        mapStr = getRoom(mapNum)
+        map = []
+        for rows in mapStr:
+            row = []
+            for col in rows:
+                if col == 'X':
                     row.append(False)
-                playMap.append(row)
-            else:
-                playMap.append(playMapRow)
-        return playMap
+                else:
+                    row.append(True)
+            map.append(row)
+        
+        return map
 
     def print_map(self):
         for i in self.map:
@@ -27,9 +62,9 @@ class Map_room:
                 else:
                     string += 'X'
             print(string)
-    
-    def editMap(self, edit_coord):
-        pass
 
-    def __init__(self):
-        self.map = self.generate_map()
+
+    def __init__(self, mapNum):
+        self.map = self.get_map(mapNum)
+        self.mobs = getMobs(mapNum)
+        #self.editMap()

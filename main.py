@@ -1,8 +1,9 @@
-from turtle import up
 import pygame
 from Map_room import Map_room
+from Player import Player
 
 pygame.init()
+pygame.font.init()
 WINDOW_WDTH = 800 #20x15 movable area
 WINDOW_HGHT = 600
 WINDOW = pygame.display.set_mode((WINDOW_WDTH,WINDOW_HGHT))
@@ -12,17 +13,51 @@ PLAYER_HGHT = 50
 PLAYER_VELOCITY = 5
 CURSOR_SIZE = 20
 CURSOR_THICKNESS = 3
+FONT = pygame.font.SysFont('comicsans', 15, True, italic=False)
 clock = pygame.time.Clock()
 
-current_map = Map_room()
+current_map = Map_room(1)
 current_map.print_map()
 
+def get_text_pos(x,y,length):
+    y -= 22
+    x -= length*3
+    return (x,y)
+
+
+def draw_mobs():
+    for mob in current_map.mobs:
+        npc_name = FONT.render(mob.name, 1, mob.name_color)
+        npc_pos = roundCursorPos((mob.x, mob.y))
+        npc_name_pos = get_text_pos(npc_pos[0], npc_pos[1], len(mob.name))
+        npc = pygame.Rect(npc_pos[0], npc_pos[1], PLAYER_WDTH, PLAYER_HGHT)
+        WINDOW.blit(npc_name, npc_name_pos)
+        pygame.draw.rect(WINDOW, mob.color, npc)
+
+def draw_UI(player: Player):
+    ui_frame = pygame.Rect(0,0,150,50)
+    name = FONT.render(player.name, 1, 'black')
+    pygame.draw.rect(WINDOW, 'grey', ui_frame)
+    health_bar_frame = pygame.Rect(1,25, 102, 7)
+    pygame.draw.rect(WINDOW, 'black', health_bar_frame)
+    health_bar = pygame.Rect(2,26, round((player.curr_health/player.max_health)*100), 5)
+    pygame.draw.rect(WINDOW, 'red', health_bar)
+    xp_bar_frame = pygame.Rect(1,33, 102, 7)
+    pygame.draw.rect(WINDOW, 'black', xp_bar_frame)
+    xp_bar = pygame.Rect(2,34, round((player.xp/100)*100), 5)
+    pygame.draw.rect(WINDOW, 'yellow', xp_bar)
+    pygame.draw.circle(WINDOW, 'black', (128,25), CURSOR_SIZE, CURSOR_THICKNESS)
+    level = FONT.render(f'{player.level}', 1, 'black')
+    WINDOW.blit(name, (5,5))
+    WINDOW.blit(level, (125,15))
 
 # draw a single frame
-def draw(player, cursor, cursor_color):
+def draw(player, cursor, cursor_color, player_info):
     WINDOW.fill('black')
-    pygame.draw.circle(WINDOW, cursor_color, cursor, CURSOR_SIZE, CURSOR_THICKNESS)
-    pygame.draw.rect(WINDOW, (255,255,255), player)
+    pygame.draw.circle(WINDOW, cursor_color, cursor, CURSOR_SIZE, CURSOR_THICKNESS) #Cursor
+    draw_mobs()
+    draw_UI(player_info)
+    pygame.draw.rect(WINDOW, (255,255,255), player)#Player model
     pygame.display.update()
 
 def setDestination(x, y, coords: tuple):
@@ -89,6 +124,7 @@ def main():
     red = (255,0,0)
     green = (0,255,0)
     cursor_color = green
+    player_info = Player('Greenmafia', 200, 200, 1, 0, [], []) #PLAYER DATA
 
     # main loop that keeps the game running
     while checkGameClose():
@@ -113,7 +149,7 @@ def main():
         distance_Y = move[1]
 
         clock.tick(30)#framerate
-        draw(player, cursor, cursor_color) #Draw current frame
+        draw(player, cursor, cursor_color, player_info) #Draw current frame
     
     #While loop breaks -> Game closes
     pygame.quit()
