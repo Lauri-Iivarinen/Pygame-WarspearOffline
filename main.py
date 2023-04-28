@@ -101,7 +101,7 @@ def draw_ability_bar(abilities: list):
             pygame.draw.rect(WINDOW, (0,0,0), icon, 1) 
             WINDOW.blit(cd, (x+12, 570))
         WINDOW.blit(name, (x,552))
-        x += 10
+        x += 50
 
 # draw a single frame
 def draw(player, cursor, cursor_color, player_info: Player, active_target):
@@ -218,7 +218,10 @@ def main():
     player_info = Player('Greenmafia', 200, 200, 1, 0, [], []) #PLAYER DATA
     active_target = False
     #Abilioties
+    gcd_ok = True
     useHeal = False
+    useSlash = False
+
     in_menu = True
     menu_closed = False
 
@@ -260,8 +263,12 @@ def main():
                 
             #ABILITIES
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_1]:
+            if keys[pygame.K_1] and gcd_ok:
                 useHeal = True
+                gcd_ok = False
+            if keys[pygame.K_2] and gcd_ok:
+                useSlash = True
+                gcd_ok = False
             
             #Move character and update destination
             move = movePlayer(player, distance_X, distance_Y)
@@ -275,8 +282,13 @@ def main():
                 if active_target:
                     do_interact(active_target, player, player_info)
                 if useHeal:
-                    player_info.useAbility('Revitalize')
+                    player_info.useAbility('Vitalize')
                     useHeal = False
+                    gcd_ok = True
+                if useSlash:
+                    player_info.useAbility('Slash')
+                    useSlash = False
+                    gcd_ok = True
                 
             else:
                 tick += 1
