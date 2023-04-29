@@ -1,8 +1,11 @@
+from turtle import update
 import pygame
 from Map_room import Map_room
 from Player import Player
 from Mob import Mob
 from Ability import Ability
+from Combat_text import Combat_text
+from Quest import Quest
 
 pygame.init()
 pygame.font.init()
@@ -23,6 +26,13 @@ clock = pygame.time.Clock()
 
 current_map = Map_room(1)
 current_map.print_map()
+combat_txt = []
+announcement = []
+open_quest=[]
+
+def clear_opened_quest():
+    if len(open_quest) > 0:
+        open_quest.pop()
 
 def draw_menu():
     WINDOW.fill((145,150,50))
@@ -103,16 +113,167 @@ def draw_ability_bar(abilities: list):
         WINDOW.blit(name, (x,552))
         x += 50
 
+def draw_announcement():
+    for txt in announcement:
+        text = BIGFONT.render(txt.txt, 1, txt.color)
+        WINDOW.blit(text, (txt.x, txt.y))
+        txt.update_pos(1)#Text velocity
+        if txt.lifetime <= 0:
+            index = announcement.index(txt)
+            announcement.pop(index)
+
+def draw_combat_text():
+    for txt in combat_txt:
+        text = FONT.render(txt.txt, 1, txt.color)
+        WINDOW.blit(text, (txt.x, txt.y))
+        txt.update_pos(2)#Text velocity
+        if txt.lifetime <= 0:
+            index = combat_txt.index(txt)
+            combat_txt.pop(index)
+
+def draw_opened_quest(quest: Quest, cursor, player: Player,x: int, y: int, completing_quest, target: Mob):
+    bg = pygame.Rect(x,y,280,280)
+    pygame.draw.rect(WINDOW, (255,215,128), bg)
+    frame = pygame.Rect(x,y,280,280)
+    pygame.draw.rect(WINDOW, 'black', frame, 1)
+    title = FONT.render(quest.title, 1, 'black')
+    WINDOW.blit(title, (x+10,y))
+    info_txt = quest.information.split('\n')
+    txt_y = y+20
+    for txt in info_txt:
+        information = SMALLFONT.render(txt, 1, 'black')
+        WINDOW.blit(information, (x+10,txt_y))
+        txt_y += 10
+    object = SMALLFONT.render(quest.object, 1, 'black')
+    WINDOW.blit(object, (x+10, 370))
+    if completing_quest:
+        txt_frame = pygame.Rect(x+10,390,70,40)
+        pygame.draw.rect(WINDOW, 'black', txt_frame, 1)
+        object = FONT.render('Complete', 1, 'black')
+        WINDOW.blit(object, (x+15,400))
+    else:
+        txt_frame = pygame.Rect(x+10,390,70,40)
+        pygame.draw.rect(WINDOW, 'black', txt_frame, 1)
+        object = FONT.render('Accept', 1, 'black')
+        dcl_frame = pygame.Rect(x+90,390,70,40)
+        pygame.draw.rect(WINDOW, 'black', dcl_frame, 1)
+        decline = FONT.render('Decline', 1, 'black')
+        WINDOW.blit(object, (x+15,400))
+        WINDOW.blit(decline, (x+95, 400))
+        
+def get_quests(target: Mob, player: Player):
+    quests = []
+    quest_count = 0
+    for quest in target.quests:
+        if quest.lvl_requirement <= player.level:
+            quests.append(quest)
+            quest_count += 1
+        if quest_count == 3:
+            break
+    return quests
+
+def accept_quest(player: Player, target: Mob):
+    if len(open_quest) == 1:
+        if player.accept_quest(open_quest[0]):
+            target.quest_accepted(open_quest[0])
+            print('QUEST ACCEPTED')
+            announcement.append(Combat_text('QUEST ACCEPTED', 'white', 300, 75))
+            clear_opened_quest()
+
+def get_completed_quests(target: Mob, player: Player):
+    quests = []
+    for quest in target.quests_in_process:
+        for player_quest in player.quests:
+            if quest==player_quest and player_quest.completed:
+                quests.append(player_quest)
+    return quests
+
+def draw_text_box(target: Mob, player: Player):
+    text_x = 260
+    text_y = 110
+    bg = pygame.Rect(250, 100, 300, 400)
+    pygame.draw.rect(WINDOW, (255,215,128), bg)
+    frame = pygame.Rect(250, 100, 300, 400)
+    pygame.draw.rect(WINDOW, (194, 132, 0), frame, 4)
+    completed_quests = get_completed_quests(target, player)
+
+    txt = target.on_speak_text.split('\n')
+    for str in txt:
+        greeting = FONT.render(str, 1, 'black')
+        WINDOW.blit(greeting, (text_x,text_y))
+        text_y += 15
+
+    if len(completed_quests) > 0:
+        mouse = pygame.mouse.get_pressed()
+        y = 10+text_y
+        draw_opened_quest(completed_quests[0], (0,0), player, text_x, 10+text_y, True, target)
+        if mouse[0]:
+            cursor = pygame.mouse.get_pos()
+            if cursor[0] >= text_x and cursor[0] <= text_x+280 and cursor[1] >= 450 and cursor[1] <= 500:
+                clear_opened_quest()
+            if cursor[0] >= text_x+10 and cursor[0] <= text_x+80 and cursor[1] >= 390 and cursor[1] <= 430:#accept button
+                player.complete_quest(completed_quests[0])
+                announcement.append(Combat_text('Quest completed', 'white', 300, 75))
+    else:
+        quests = get_quests(target, player)
+        #draw_quests(target, text_x, text_y, player)
+        cursor = (0,0)
+        mouse = pygame.mouse.get_pressed()
+        y = 10+text_y
+        if mouse[0]:
+            cursor = pygame.mouse.get_pos()
+            if cursor[0] >= text_x and cursor[0] <= text_x+280 and cursor[1] >= 450 and cursor[1] <= 500:
+                clear_opened_quest()
+            if cursor[0] >= text_x+90 and cursor[0] <= text_x+160 and cursor[1] >= 390 and cursor[1] <= 430:#decline button
+                clear_opened_quest()
+            if cursor[0] >= text_x+10 and cursor[0] <= text_x+80 and cursor[1] >= 390 and cursor[1] <= 430:#accept button
+                accept_quest(player, target)
+        if len(open_quest) == 0:
+            for quest in quests:
+                if cursor[0] >= text_x and cursor[0] <= text_x+280 and cursor[1]>=y and cursor[1] <= y+50:
+                    open_quest.append(quest)
+                    break
+                frame = pygame.Rect(text_x,y,280,50)
+                pygame.draw.rect(WINDOW, 'black', frame, 1)
+                object = FONT.render(f'{quest.xp}xp - {quest.title}!', 1, 'black')
+                WINDOW.blit(object, (text_x+10, y+10))
+                y += 60
+        else:
+            draw_opened_quest(open_quest[0], (0,0), player, text_x, y, False, target)
+
+def draw_quest_tracker(player: Player):
+    text = FONT.render(f'Quests {len(player.quests)}/3:', 1, 'white')
+    WINDOW.blit(text, (650, 20))
+    x = 660
+    y = 40
+    for quest in player.quests:
+        obj = SMALLFONT.render(quest.object, 1, 'white')
+        if quest.completed:
+            count = FONT.render('Completed!', 1, 'white')
+        else:
+            count = FONT.render(f'{quest.current_count}/{quest.object_count}', 1, 'white')
+        WINDOW.blit(obj, (x,y))
+        WINDOW.blit(count, (x, y+10))
+       
+        y += 25
+
+
 # draw a single frame
-def draw(player, cursor, cursor_color, player_info: Player, active_target):
+def draw(player, cursor, cursor_color, player_info: Player, active_target, speaking: bool, accepting_quest=False):
     WINDOW.fill('black')
-    pygame.draw.circle(WINDOW, cursor_color, cursor, CURSOR_SIZE, CURSOR_THICKNESS) #Cursor
+    if not speaking:
+        pygame.draw.circle(WINDOW, cursor_color, cursor, CURSOR_SIZE, CURSOR_THICKNESS) #Cursor
     draw_mobs()
     draw_UI(player_info)
     if active_target:
         draw_target_UI(active_target)
     draw_ability_bar(player_info.abilities)
+    draw_combat_text()
+    draw_announcement()
+    draw_quest_tracker(player_info)
     pygame.draw.rect(WINDOW, (255,255,255), player)#Player model
+    if speaking and active_target:
+        draw_text_box(active_target, player_info)
     pygame.display.update()
 
 def setDestination(x, y, coords: tuple):
@@ -132,7 +293,10 @@ def getDistance(player_coord, coord, x: bool):
         return (player_coord+PLAYER_WDTH/2) - coord
     return (player_coord+45) - coord
 
-def movePlayer(player, distance_X, distance_Y):
+def movePlayer(player, distance_X, distance_Y, target, r_click: bool):
+    if target and r_click:
+        if check_player_range((player.x, player.y), (target.x, target.y)):
+            return (distance_X, distance_Y)
    #First move X axis, then move Y axis
     if distance_X < 0 and distance_X < PLAYER_VELOCITY:
         player.x += PLAYER_VELOCITY
@@ -192,20 +356,34 @@ def check_player_range(target: tuple, player: tuple) -> bool:
     
     return False
 
+def update_quests(player: Player, target=False):
+    for quest in player.quests:
+        if target:
+            print('goblin killed')
+            if quest.object_target == target.name:
+                quest.update_count()
+
 def do_interact(target: Mob, player, player_info: Player):
     if target.alive:
         close = check_player_range((target.x, target.y), (player.x, player.y))
         if close and target.hostile:
-            target.receive_damage(player_info.calc_damage())
+            damage = player_info.calc_damage()
+            target.receive_damage(damage)
+            combat_txt.append(Combat_text(f'{damage}','white',target.x, target.y))
             player_info.receive_damage(target.damage)
+            combat_txt.append(Combat_text(f'{target.damage}','red', player.x, player.y))
             if target.curr_health == 0:
                 print('targed died')
+                update_quests(player_info, target)
                 player_info.gain_xp(target.xp)
         elif close:
-            print('speaking')
+            return True
+
+    return False
 
 def main():
-    tick = 0
+    tick = 0 #Framerate tick
+    #Player movement
     destination_X = 0
     destination_Y = 0
     distance_X = 0
@@ -217,23 +395,28 @@ def main():
     cursor_color = green
     player_info = Player('Greenmafia', 200, 200, 1, 0, [], []) #PLAYER DATA
     active_target = False
+    r_click = False
+    speaking = False
+
     #Abilioties
     gcd_ok = True
     useHeal = False
     useSlash = False
 
+    #MAIN MENU HANDLERS
     in_menu = True
     menu_closed = False
 
     # main loop that keeps the game running
     while checkGameClose():
-        if not in_menu:
+        if not in_menu and not speaking:
             mouse = pygame.mouse.get_pressed()
             if mouse[0] and menu_closed: #Left click moves player
                 cursor = roundCursorPos(pygame.mouse.get_pos())
                 if move_ok(cursor, current_map.map):
                     cursor_color = green
                     mouse_coords = cursor
+                    r_click = False
                     if destination_X != mouse_coords[0]:
                         destination_X = mouse_coords[0]
                         distance_X = getDistance(player.x, destination_X, True)
@@ -252,6 +435,7 @@ def main():
                 if move_ok(cursor, current_map.map):
                     cursor_color = green
                     mouse_coords = cursor
+                    r_click = True
                     if destination_X != mouse_coords[0]:
                         destination_X = mouse_coords[0]
                         distance_X = getDistance(player.x, destination_X, True)
@@ -271,7 +455,7 @@ def main():
                 gcd_ok = False
             
             #Move character and update destination
-            move = movePlayer(player, distance_X, distance_Y)
+            move = movePlayer(player, distance_X, distance_Y, active_target, r_click)
             distance_X = move[0]
             distance_Y = move[1]
 
@@ -280,7 +464,7 @@ def main():
                 menu_closed = True
                 player_info.reduce_cooldowns()
                 if active_target:
-                    do_interact(active_target, player, player_info)
+                    speaking = do_interact(active_target, player, player_info)
                 if useHeal:
                     player_info.useAbility('Vitalize')
                     useHeal = False
@@ -292,9 +476,18 @@ def main():
                 
             else:
                 tick += 1
-
+            clear_opened_quest()
             clock.tick(30)#framerate
-            draw(player, cursor, cursor_color, player_info, active_target) #Draw current frame
+            draw(player, cursor, cursor_color, player_info, active_target, speaking) #Draw current frame
+        elif not in_menu:#Talking
+            mouse = pygame.mouse.get_pressed()
+            if mouse[0]:
+                cursor = pygame.mouse.get_pos()
+                if cursor[0] < 250 or cursor[0] > 550 or cursor[1] < 100 or cursor[1] > 500:
+                    speaking = False
+                    active_target = False
+            clock.tick(30)#framerate
+            draw(player, cursor, cursor_color, player_info, active_target, speaking)
         else:
             #75, 130, 100, 50
             mouse = pygame.mouse.get_pressed()

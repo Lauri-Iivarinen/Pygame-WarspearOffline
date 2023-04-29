@@ -64,6 +64,19 @@ class Player:
         for cd in self.abilities:
             cd.run_cooldown()
 
+    def accept_quest(self, quest):
+        found = self.quests.count(quest)
+        if found == 0 and len(self.quests) <=3:
+            self.quests.append(quest)
+            return True
+        return False
+    
+    def complete_quest(self, quest):
+        index = self.quests.index(quest)
+        self.quests.pop(index)
+        self.gain_xp(quest.xp)
+
+
     def __init__(self, name: str, max_health: int, curr_health:int, level: int, xp: int, quests: list, abilities: list, alive=True ):
         self.name = name
         self.max_health = max_health
