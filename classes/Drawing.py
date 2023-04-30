@@ -53,21 +53,24 @@ class Drawing:
 
     def draw_mobs(self, player: Player):
         for mob in self.map.mobs:
+            name:str = mob.name
+            npc = pygame.transform.scale(pygame.image.load(f'assets/mobs/{name.strip()}.png'), (self.PLAYER_WDTH, self.PLAYER_HGHT))
+            npc_name = self.FONT.render(mob.name, 1, mob.name_color)
+            npc_pos = self.roundCursorPos((mob.x, mob.y))
             if mob.alive:
-                npc_name = self.FONT.render(mob.name, 1, mob.name_color)
-                npc_pos = self.roundCursorPos((mob.x, mob.y))
                 npc_name_pos = self.get_text_pos(npc_pos[0]-10, npc_pos[1], len(mob.name))
-                npc = pygame.Rect(npc_pos[0]-10, npc_pos[1], self.PLAYER_WDTH, self.PLAYER_HGHT)
+                #npc = pygame.Rect(npc_pos[0]-10, npc_pos[1], self.PLAYER_WDTH, self.PLAYER_HGHT)
                 self.WINDOW.blit(npc_name, npc_name_pos)
-                pygame.draw.rect(self.WINDOW, mob.color, npc)
+                #pygame.draw.rect(self.WINDOW, mob.color, npc)
                 if not mob.hostile:
                     icon = self.get_quest_icon(mob, player)
                     quest_icon = self.LARGEFONT.render(icon, 1, 'yellow')
                     self.WINDOW.blit(quest_icon, (self.get_quest_icon_pos(npc_pos[0], icon), npc_name_pos[1]-30))
             else:
-                npc_pos = self.roundCursorPos((mob.x, mob.y))
                 npc = pygame.Rect(npc_pos[0]-10, npc_pos[1]+self.PLAYER_WDTH, self.PLAYER_HGHT, self.PLAYER_WDTH)
                 pygame.draw.rect(self.WINDOW, mob.color, npc)
+
+            self.WINDOW.blit(npc, (npc_pos[0]-10, npc_pos[1]))
     
 
     def draw_UI(self,player: Player):
