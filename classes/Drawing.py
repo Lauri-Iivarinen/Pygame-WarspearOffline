@@ -38,8 +38,20 @@ class Drawing:
         y -= 22
         x -= length*3
         return (x,y)
+    
+    def get_quest_icon(self, mob: Mob, player: Player) -> str:
+        quests = self.get_completed_quests(mob, player)
+        if len(quests) > 0:
+            return "?"
+        elif mob.is_aivailable_quests(player.level):
+            return "!"
+        return ""
 
-    def draw_mobs(self):
+    def get_quest_icon_pos(self, pos, icon):
+        if icon == '!': return pos-2
+        else: return pos-4
+
+    def draw_mobs(self, player: Player):
         for mob in self.map.mobs:
             if mob.alive:
                 npc_name = self.FONT.render(mob.name, 1, mob.name_color)
@@ -48,6 +60,10 @@ class Drawing:
                 npc = pygame.Rect(npc_pos[0]-10, npc_pos[1], self.PLAYER_WDTH, self.PLAYER_HGHT)
                 self.WINDOW.blit(npc_name, npc_name_pos)
                 pygame.draw.rect(self.WINDOW, mob.color, npc)
+                if not mob.hostile:
+                    icon = self.get_quest_icon(mob, player)
+                    quest_icon = self.LARGEFONT.render(icon, 1, 'yellow')
+                    self.WINDOW.blit(quest_icon, (self.get_quest_icon_pos(npc_pos[0], icon), npc_name_pos[1]-30))
             else:
                 npc_pos = self.roundCursorPos((mob.x, mob.y))
                 npc = pygame.Rect(npc_pos[0]-10, npc_pos[1]+self.PLAYER_WDTH, self.PLAYER_HGHT, self.PLAYER_WDTH)
@@ -95,8 +111,10 @@ class Drawing:
         for ability in abilities:
             name = self.SMALLFONT.render(ability.name, 1, 'black')
             if ability.usable:
+                img = pygame.image.load(f'assets/icons/{ability.name}.png')
                 icon = pygame.Rect(x,y,30,30)#Replace with icon
                 pygame.draw.rect(self.WINDOW, (0,0,0) , icon)
+                self.WINDOW.blit(img, (x,y))
             else:
                 cd = self.FONT.render(f'{ability.cooldown_remaining}', 1, 'black')
                 icon = pygame.Rect(x,y,30,30)
@@ -256,7 +274,7 @@ class Drawing:
         self.WINDOW.fill('black')
         if not speaking:
             pygame.draw.circle(self.WINDOW, cursor_color, cursor, self.CURSOR_SIZE, self.CURSOR_THICKNESS) #Cursor
-        self.draw_mobs()
+        self.draw_mobs(player_info)
         self.draw_UI(player_info)
         if active_target:
             self.draw_target_UI(active_target)

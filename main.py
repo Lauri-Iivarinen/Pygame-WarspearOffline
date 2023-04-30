@@ -128,6 +128,22 @@ def do_interact(target: Mob, player, player_info: Player):
 
     return False
 
+def check_map_change(player):
+    grid = map_grid_pos((player.x, player.y))
+    if grid[0] == 0:
+        current_map.enter_new_map(player.x, player.y)
+        return ('x', 790)
+    elif grid[0] == 20:
+        current_map.enter_new_map(player.x, player.y)
+        return ('x', 10)
+    elif grid[1] == -1:
+        current_map.enter_new_map(player.x, player.y)
+        return ('y', 590)
+    elif grid[1] == 14:
+        current_map.enter_new_map(player.x, player.y)
+        return ('y', 10)
+    return False
+
 def main():
     tick = 0 #Framerate tick
     #Player movement
@@ -144,6 +160,7 @@ def main():
     active_target = False
     r_click = False
     speaking = False
+    old_map = True
 
     #Abilioties
     gcd_ok = True
@@ -158,7 +175,7 @@ def main():
 
     # main loop that keeps the game running
     while checkGameClose():
-        if not in_menu and not speaking:
+        if not in_menu and not speaking: #Basic display open
             mouse = pygame.mouse.get_pressed()
             if mouse[0] and menu_closed: #Left click moves player
                 cursor = roundCursorPos(pygame.mouse.get_pos())
@@ -166,6 +183,7 @@ def main():
                     cursor_color = green
                     mouse_coords = cursor
                     r_click = False
+                    old_map = True
                     if destination_X != mouse_coords[0]:
                         destination_X = mouse_coords[0]
                         distance_X = getDistance(player.x, destination_X, True)
@@ -185,6 +203,7 @@ def main():
                     cursor_color = green
                     mouse_coords = cursor
                     r_click = True
+                    old_map = True
                     if destination_X != mouse_coords[0]:
                         destination_X = mouse_coords[0]
                         distance_X = getDistance(player.x, destination_X, True)
@@ -212,6 +231,15 @@ def main():
                 tick = 0
                 menu_closed = True
                 player_info.reduce_cooldowns()
+                #print(distance_X, distance_Y)
+                if distance_X <= 5 and distance_Y <= 5 and old_map:
+                    coords = check_map_change(player)
+                    if coords:
+                        old_map = False
+                        if coords[0] == 'x':
+                            player.x = coords[1]
+                        elif coords[0] == 'y':
+                            player.y = coords[1]
                 if active_target:
                     speaking = do_interact(active_target, player, player_info)
                 if useHeal:
@@ -228,7 +256,7 @@ def main():
             drawing.clear_opened_quest()
             clock.tick(30)#framerate
             drawing.draw(player, cursor, cursor_color, player_info, active_target, speaking) #Draw current frame
-        elif not in_menu:#Talking
+        elif not in_menu:#Talking to and npc
             mouse = pygame.mouse.get_pressed()
             if mouse[0]:
                 cursor = pygame.mouse.get_pos()
@@ -238,8 +266,7 @@ def main():
                     cursor=(-60,-60)
             clock.tick(30)#framerate
             drawing.draw(player, cursor, cursor_color, player_info, active_target, speaking)
-        else:
-            #75, 130, 100, 50
+        else: #Main menu and game not started yet
             mouse = pygame.mouse.get_pressed()
             if mouse[0]: #Left click moves player
                 cursor = pygame.mouse.get_pos()

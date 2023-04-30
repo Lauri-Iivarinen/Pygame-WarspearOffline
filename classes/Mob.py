@@ -5,6 +5,12 @@ class Mob:
             return 'red'
         return 'white'
 
+    def is_aivailable_quests(self, player_lvl):
+        for quest in self.quests:
+            if quest.lvl_requirement <= player_lvl:
+                return True
+        return False
+
     def die(self):
         self.damage = 0
         self.curr_health = 0
