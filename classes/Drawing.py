@@ -67,56 +67,68 @@ class Drawing:
                     quest_icon = self.LARGEFONT.render(icon, 1, 'yellow')
                     self.WINDOW.blit(quest_icon, (self.get_quest_icon_pos(npc_pos[0], icon), npc_name_pos[1]-30))
             else:
-                npc = pygame.Rect(npc_pos[0]-10, npc_pos[1]+self.PLAYER_WDTH, self.PLAYER_HGHT, self.PLAYER_WDTH)
-                pygame.draw.rect(self.WINDOW, mob.color, npc)
+                #pygame.draw.circle(self.WINDOW, 'red', (npc_pos[0], npc_pos[1]+40), 20)
+                npc = pygame.transform.rotate(npc, -90)
+                npc_pos = (npc_pos[0], npc_pos[1]+30)
+                blood = pygame.Rect(npc_pos[0]-10, npc_pos[1]+5, self.PLAYER_HGHT, self.PLAYER_WDTH)
+                pygame.draw.ellipse(self.WINDOW, 'red', blood)
 
             self.WINDOW.blit(npc, (npc_pos[0]-10, npc_pos[1]))
     
 
     def draw_UI(self,player: Player):
-        ui_frame = pygame.Rect(0,0,150,50)
+        bg = pygame.Rect(0,0,150,60)
+        pygame.draw.rect(self.WINDOW, (255,215,128), bg)
+        pygame.draw.rect(self.WINDOW, (194, 132, 0), bg, 2)
         name = self.FONT.render(player.name, 1, 'black')
-        pygame.draw.rect(self.WINDOW, 'grey', ui_frame)
-        health_bar_frame = pygame.Rect(1,25, 102, 7)
+        health_bar_frame = pygame.Rect(3,25, 102, 7)
         pygame.draw.rect(self.WINDOW, 'black', health_bar_frame)
-        health_bar = pygame.Rect(2,26, round((player.curr_health/player.max_health)*100), 5)
+        health_bar = pygame.Rect(4,26, round((player.curr_health/player.max_health)*100), 5)
         pygame.draw.rect(self.WINDOW, 'red', health_bar)
-        xp_bar_frame = pygame.Rect(1,33, 102, 7)
+        xp_bar_frame = pygame.Rect(3,33, 102, 7)
         pygame.draw.rect(self.WINDOW, 'black', xp_bar_frame)
-        xp_bar = pygame.Rect(2,34, round((player.xp/100)*100), 5)
+        xp_bar = pygame.Rect(4,34, round((player.xp/100)*100), 5)
         pygame.draw.rect(self.WINDOW, 'yellow', xp_bar)
         pygame.draw.circle(self.WINDOW, 'black', (128,25), self.CURSOR_SIZE, self.CURSOR_THICKNESS)
         level = self.FONT.render(f'{player.level}', 1, 'black')
         self.WINDOW.blit(name, (5,5))
         self.WINDOW.blit(level, (125,15))
+        #BG (255,215,128)
+        #frame (194, 132, 0)
 
 
     def draw_target_UI(self,player: Mob):
-        ui_frame = pygame.Rect(160,0,150,50)
+        bg = pygame.Rect(160,0,150,60)
+        pygame.draw.rect(self.WINDOW, (255,215,128), bg)
+        pygame.draw.rect(self.WINDOW, (194, 132, 0), bg, 2)
         name = self.FONT.render(player.name, 1, 'black')
         hp_txt = self.FONT.render(f'{player.curr_health}/{player.max_health}', 1, 'black')
-        pygame.draw.rect(self.WINDOW, 'grey', ui_frame)
-        health_bar_frame = pygame.Rect(161,25, 102, 7)
+        health_bar_frame = pygame.Rect(163,25, 102, 7)
         pygame.draw.rect(self.WINDOW, 'black', health_bar_frame)
-        health_bar = pygame.Rect(162,26, round((player.curr_health/player.max_health)*100), 5)
+        health_bar = pygame.Rect(164,26, round((player.curr_health/player.max_health)*100), 5)
         pygame.draw.rect(self.WINDOW, 'red', health_bar)
-        self.WINDOW.blit(name, (160,5))
+        self.WINDOW.blit(name, (162,5))
         self.WINDOW.blit(hp_txt, (165, 32))
 
 
     def draw_ability_bar(self,abilities: list):
         x = 250
         y = 550
-        ui_frame = pygame.Rect(x,y,300,50)
-        pygame.draw.rect(self.WINDOW, 'grey', ui_frame)
+        bg = pygame.Rect(x,y,300,50)
+        #pygame.draw.rect(self.WINDOW, (255,215,128), bg)
+        pygame.draw.rect(self.WINDOW, (194, 132, 0), bg, 2)
         y += 15
         x += 10
         for ability in abilities:
-            name = self.SMALLFONT.render(ability.name, 1, 'black')
+            txt:str = ability.name
+            if len(ability.name) >= 6:
+                txt = txt[0:5]+'..'
+            name = self.SMALLFONT.render(txt, 1, 'black')
+            
             if ability.usable:
                 img = pygame.image.load(f'assets/icons/{ability.name}.png')
-                icon = pygame.Rect(x,y,30,30)#Replace with icon
-                pygame.draw.rect(self.WINDOW, (0,0,0) , icon)
+                icon = pygame.Rect(x,555,30,10)#Replace with icon
+                pygame.draw.rect(self.WINDOW, (255,215,128) , icon)
                 self.WINDOW.blit(img, (x,y))
             else:
                 cd = self.FONT.render(f'{ability.cooldown_remaining}', 1, 'black')
@@ -256,25 +268,30 @@ class Drawing:
                 self.draw_opened_quest(self.open_quest[0], (0,0), player, text_x, y, False, target)
 
     def draw_quest_tracker(self,player: Player):
-        text = self.FONT.render(f'Quests {len(player.quests)}/3:', 1, 'white')
-        self.WINDOW.blit(text, (650, 20))
-        x = 660
-        y = 40
+        x = 700
+        y = 0
+        bg = pygame.Rect(x,y,100,150)
+        pygame.draw.rect(self.WINDOW, (255,215,128), bg)
+        pygame.draw.rect(self.WINDOW, (194, 132, 0), bg, 2)
+        text = self.FONT.render(f'Quests {len(player.quests)}/3:', 1, 'black')
+        self.WINDOW.blit(text, (x+5, y+10))
+        y += 35
         for quest in player.quests:
-            obj = self.SMALLFONT.render(quest.object, 1, 'white')
+            obj = self.SMALLFONT.render(quest.object, 1, 'black')
             if quest.completed:
-                count = self.FONT.render('Completed!', 1, 'white')
+                count = self.FONT.render('Completed!', 1, 'black')
             else:
-                count = self.FONT.render(f'{quest.current_count}/{quest.object_count}', 1, 'white')
-            self.WINDOW.blit(obj, (x,y))
-            self.WINDOW.blit(count, (x, y+10))
+                count = self.FONT.render(f'{quest.current_count}/{quest.object_count}', 1, 'black')
+            self.WINDOW.blit(obj, (x+10,y))
+            self.WINDOW.blit(count, (x+10, y+10))
         
             y += 25
 
 
         # draw a single frame
     def draw(self,player, cursor, cursor_color, player_info: Player, active_target, speaking: bool, accepting_quest=False):
-        self.WINDOW.fill('black')
+        BG = pygame.image.load(f'assets/background/map{self.map.map_num}.png')
+        self.WINDOW.blit(BG, (0,0))
         if not speaking:
             pygame.draw.circle(self.WINDOW, cursor_color, cursor, self.CURSOR_SIZE, self.CURSOR_THICKNESS) #Cursor
         self.draw_mobs(player_info)
