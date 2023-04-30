@@ -1,6 +1,6 @@
 
-from Mob import Mob
-from Quest import Quest
+from classes.Mob import Mob
+from classes.Quest import Quest
 
 def round_coord(num):
     return round(num/40)*40

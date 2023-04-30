@@ -1,5 +1,5 @@
-from Item import Item
-from Ability import Ability
+from classes.Item import Item
+from classes.Ability import Ability
 
 items = {
     'weapon': Item('Broken sword', 10, 15),
@@ -65,16 +65,15 @@ class Player:
             cd.run_cooldown()
 
     def accept_quest(self, quest):
-        found = self.quests.count(quest)
-        if found == 0 and len(self.quests) <=3:
+        if quest not in self.quests and len(self.quests) <=3:
             self.quests.append(quest)
             return True
         return False
     
     def complete_quest(self, quest):
-        index = self.quests.index(quest)
-        self.quests.pop(index)
-        self.gain_xp(quest.xp)
+        if quest in self.quests:
+            self.quests.remove(quest)
+            self.gain_xp(quest.xp)
 
 
     def __init__(self, name: str, max_health: int, curr_health:int, level: int, xp: int, quests: list, abilities: list, alive=True ):

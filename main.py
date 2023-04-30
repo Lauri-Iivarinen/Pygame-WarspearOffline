@@ -1,11 +1,11 @@
-from turtle import update
+
 import pygame
-from Map_room import Map_room
-from Player import Player
-from Mob import Mob
-from Ability import Ability
-from Combat_text import Combat_text
-from Quest import Quest
+from classes.Map_room import Map_room
+from classes.Player import Player
+from classes.Mob import Mob
+from classes.Ability import Ability
+from classes.Combat_text import Combat_text
+from classes.Quest import Quest
 
 pygame.init()
 pygame.font.init()
@@ -40,7 +40,7 @@ def draw_menu():
     WINDOW.blit(title, (75,75))
     play_frame = pygame.Rect(75, 130, 100, 50)
     play_txt = BIGFONT.render('PLAY', 1, 'black')
-    WINDOW.blit(play_txt, (80,135))
+    WINDOW.blit(play_txt, (100,140))
     pygame.draw.rect(WINDOW, 'black', play_frame, 1)
     pygame.display.update()
 
@@ -486,6 +486,7 @@ def main():
                 if cursor[0] < 250 or cursor[0] > 550 or cursor[1] < 100 or cursor[1] > 500:
                     speaking = False
                     active_target = False
+                    cursor=(-60,-60)
             clock.tick(30)#framerate
             draw(player, cursor, cursor_color, player_info, active_target, speaking)
         else:
