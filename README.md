@@ -1,9 +1,25 @@
 # Warspear offline
 a school project
 
-Art is generated with 
+Art (character models) is generated with AI
 
 https://openart.ai/discovery
+
+Notes
+  - Graphics suck, it wasnt the point :)
+  - Pathfinding is bad, it needs an algorithm and has none
+  - Play area is small but can be increased easily
+  
+  
+TODO
+  - Scale graphics to window size
+  - Pathfinding
+  - Combat detection and mob aggro
+  - Mob movement (chase player if has aggro) and patrolling
+  - Inventory and itemization
+  - Mobs and quests drop loot
+  - Redesign ability bar
+  - Secondary stats (dodge, critical hits etc.)
 
 # 1. To run the game, you will need to have python installed
 Install pygame package -> pip install pygame
