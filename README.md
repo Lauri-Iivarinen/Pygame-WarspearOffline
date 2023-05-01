@@ -12,6 +12,7 @@ Notes
   
   
 TODO
+  - More indepth classes such as player movement
   - Scale graphics to window size
   - Pathfinding
   - Combat detection and mob aggro
