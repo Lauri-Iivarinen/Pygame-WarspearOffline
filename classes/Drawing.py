@@ -43,7 +43,7 @@ class Drawing:
         quests = self.get_completed_quests(mob, player)
         if len(quests) > 0:
             return "?"
-        elif mob.is_aivailable_quests(player.level):
+        elif mob.is_aivailable_quests(player):
             return "!"
         return ""
 
@@ -87,7 +87,7 @@ class Drawing:
         pygame.draw.rect(self.WINDOW, 'red', health_bar)
         xp_bar_frame = pygame.Rect(3,33, 102, 7)
         pygame.draw.rect(self.WINDOW, 'black', xp_bar_frame)
-        xp_bar = pygame.Rect(4,34, round((player.xp/100)*100), 5)
+        xp_bar = pygame.Rect(4,34, round((player.xp/player.xp_cap)*100), 5)
         pygame.draw.rect(self.WINDOW, 'yellow', xp_bar)
         pygame.draw.circle(self.WINDOW, 'black', (128,25), self.CURSOR_SIZE, self.CURSOR_THICKNESS)
         level = self.FONT.render(f'{player.level}', 1, 'black')
@@ -142,10 +142,9 @@ class Drawing:
         for txt in self.announcement:
             text = self.BIGFONT.render(txt.txt, 1, txt.color)
             self.WINDOW.blit(text, (txt.x, txt.y))
-            txt.update_pos(1)#Text velocity
+            txt.update_pos(txt.speed)#Text velocity
             if txt.lifetime <= 0:
-                index = self.announcement.index(txt)
-                self.announcement.pop(index)
+                self.announcement.remove(txt)
 
     def draw_combat_text(self):
         for txt in self.combat_txt:
@@ -191,7 +190,7 @@ class Drawing:
         quests = []
         quest_count = 0
         for quest in target.quests:
-            if quest.lvl_requirement <= player.level:
+            if quest.quest_aivailable(player):
                 quests.append(quest)
                 quest_count += 1
             if quest_count == 3:
@@ -210,7 +209,7 @@ class Drawing:
         quests = []
         for quest in target.quests_in_process:
             for player_quest in player.quests:
-                if quest==player_quest and player_quest.completed:
+                if quest.title==player_quest.title and player_quest.completed:
                     quests.append(player_quest)
         return quests
 
@@ -273,10 +272,12 @@ class Drawing:
         bg = pygame.Rect(x,y,100,150)
         pygame.draw.rect(self.WINDOW, (255,215,128), bg)
         pygame.draw.rect(self.WINDOW, (194, 132, 0), bg, 2)
-        text = self.FONT.render(f'Quests {len(player.quests)}/3:', 1, 'black')
+        text = self.FONT.render(f'Quests ({len(player.quests)}):', 1, 'black')
         self.WINDOW.blit(text, (x+5, y+10))
         y += 35
+        loop_count = 0
         for quest in player.quests:
+            loop_count += 1
             obj = self.SMALLFONT.render(quest.object, 1, 'black')
             if quest.completed:
                 count = self.FONT.render('Completed!', 1, 'black')
@@ -284,7 +285,8 @@ class Drawing:
                 count = self.FONT.render(f'{quest.current_count}/{quest.object_count}', 1, 'black')
             self.WINDOW.blit(obj, (x+10,y))
             self.WINDOW.blit(count, (x+10, y+10))
-        
+            if loop_count == 4:
+                break
             y += 25
 
 
@@ -302,7 +304,9 @@ class Drawing:
         self.draw_combat_text()
         self.draw_announcement()
         self.draw_quest_tracker(player_info)
-        pygame.draw.rect(self.WINDOW, (255,255,255), player)#Player model
+        #pygame.draw.rect(self.WINDOW, (255,255,255), player)#Player model
+        play = pygame.transform.scale(pygame.image.load('assets/mobs/Player.png'), (self.PLAYER_WDTH, self.PLAYER_HGHT))
+        self.WINDOW.blit(play, (player.x, player.y))
         if speaking and active_target:
             self.draw_text_box(active_target, player_info)
         pygame.display.update()

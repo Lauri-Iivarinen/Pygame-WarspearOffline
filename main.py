@@ -103,12 +103,19 @@ def check_player_range(target: tuple, player: tuple) -> bool:
     
     return False
 
-def update_quests(player: Player, target=False):
+def update_quests(player: Player, target=False, type='kill'):
     for quest in player.quests:
         if target:
-            print('goblin killed')
-            if quest.object_target == target.name:
-                quest.update_count()
+            if quest.type == 'kill':
+                if quest.object_target == target.name:
+                    quest.update_count()
+        elif quest.type == 'lvl':
+            if quest.object_count <= player.level:
+                quest.update_count(player.level)
+            else: 
+                quest.current_count = player.level
+        if quest.type == 'autocomplete' or quest.type == 'find':
+            quest.update_count()
 
 def do_interact(target: Mob, player, player_info: Player):
     if target.alive:
@@ -151,7 +158,8 @@ def main():
     destination_Y = 0
     distance_X = 0
     distance_Y = 0
-    player = pygame.Rect(380, 265, PLAYER_WDTH, PLAYER_HGHT)
+    pos = roundCursorPos((670, 530))
+    player = pygame.Rect(pos[0]-10, pos[1]-40, PLAYER_WDTH, PLAYER_HGHT)
     cursor = (-60,-60) #Initial position of cursor
     red = (255,0,0)
     green = (0,255,0)
@@ -166,16 +174,42 @@ def main():
     gcd_ok = True
     useHeal = False
     useSlash = False
+    useSmash = False
 
     #MAIN MENU HANDLERS
     in_menu = True
     menu_closed = False
+    new_game = True
 
     
 
     # main loop that keeps the game running
     while checkGameClose():
-        if not in_menu and not speaking: #Basic display open
+        if in_menu: #Main menu and game not started yet
+            mouse = pygame.mouse.get_pressed()
+            if mouse[0]: #Left click moves player
+                cursor = pygame.mouse.get_pos()
+                if cursor[0] >= 75 and cursor[0] <= 175 and cursor[1] >= 130 and cursor[1] <= 180:
+                    in_menu = False
+                    cursor=pos
+            clock.tick(30)#framerate
+            drawing.draw_menu()
+        elif new_game:
+            drawing.announcement.append(Combat_text('You wake up in an island you have no recollection of...', 'white', 130, 280, 200, 0))
+            drawing.announcement.append(Combat_text('What in the world is going on?', 'white', 220, 300, 200, 0))
+            drawing.announcement.append(Combat_text('Maybe this drunken sailor knows where I am.', 'white', 160, 320, 200, 0))
+            new_game = False
+        elif speaking:#Talking to an npc
+            mouse = pygame.mouse.get_pressed()
+            if mouse[0]:
+                cursor = pygame.mouse.get_pos()
+                if cursor[0] < 250 or cursor[0] > 550 or cursor[1] < 100 or cursor[1] > 500:
+                    speaking = False
+                    active_target = False
+                    cursor=(-60,-60)
+            clock.tick(30)#framerate
+            drawing.draw(player, cursor, cursor_color, player_info, active_target, speaking)
+        else: #Basic display open
             mouse = pygame.mouse.get_pressed()
             if mouse[0] and menu_closed: #Left click moves player
                 cursor = roundCursorPos(pygame.mouse.get_pos())
@@ -215,11 +249,14 @@ def main():
                 
             #ABILITIES
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_1] and gcd_ok:
+            if keys[pygame.K_1] and gcd_ok and player_info.ability_usable('Vitalize'):
                 useHeal = True
                 gcd_ok = False
-            if keys[pygame.K_2] and gcd_ok:
+            if keys[pygame.K_2] and gcd_ok and player_info.ability_usable('Slash'):
                 useSlash = True
+                gcd_ok = False
+            if keys[pygame.K_3] and gcd_ok and player_info.ability_usable('Smash'):
+                useSmash = True
                 gcd_ok = False
             
             #Move character and update destination
@@ -231,49 +268,40 @@ def main():
                 tick = 0
                 menu_closed = True
                 player_info.reduce_cooldowns()
-                #print(distance_X, distance_Y)
+                update_quests(player_info, False, 'lvl')
                 if distance_X <= 5 and distance_Y <= 5 and old_map:
                     coords = check_map_change(player)
                     if coords:
                         old_map = False
                         if coords[0] == 'x':
                             player.x = coords[1]
+                            cursor = (coords[1], cursor[1])
                         elif coords[0] == 'y':
                             player.y = coords[1]
+                            cursor = (cursor[0], coords[1])
                 if active_target:
                     speaking = do_interact(active_target, player, player_info)
                 if useHeal:
-                    player_info.useAbility('Vitalize')
-                    useHeal = False
-                    gcd_ok = True
+                    if player_info.useAbility('Vitalize'):
+                        heal = player_info.get_ability('Vitalize')
+                        drawing.combat_txt.append(Combat_text(f'{player_info.calc_healing(heal.healing)}', 'green', player.x, player.y))
+                        useHeal = False
+                        gcd_ok = True
                 if useSlash:
-                    player_info.useAbility('Slash')
-                    useSlash = False
-                    gcd_ok = True
+                    if player_info.useAbility('Slash'):
+                        useSlash = False
+                        gcd_ok = True
+                if useSmash:
+                    if player_info.useAbility('Smash'):
+                        useSmash = False
+                        gcd_ok = True
                 
             else:
                 tick += 1
             drawing.clear_opened_quest()
             clock.tick(30)#framerate
             drawing.draw(player, cursor, cursor_color, player_info, active_target, speaking) #Draw current frame
-        elif not in_menu:#Talking to and npc
-            mouse = pygame.mouse.get_pressed()
-            if mouse[0]:
-                cursor = pygame.mouse.get_pos()
-                if cursor[0] < 250 or cursor[0] > 550 or cursor[1] < 100 or cursor[1] > 500:
-                    speaking = False
-                    active_target = False
-                    cursor=(-60,-60)
-            clock.tick(30)#framerate
-            drawing.draw(player, cursor, cursor_color, player_info, active_target, speaking)
-        else: #Main menu and game not started yet
-            mouse = pygame.mouse.get_pressed()
-            if mouse[0]: #Left click moves player
-                cursor = pygame.mouse.get_pos()
-                if cursor[0] >= 75 and cursor[0] <= 175 and cursor[1] >= 130 and cursor[1] <= 180:
-                    in_menu = False
-            clock.tick(30)#framerate
-            drawing.draw_menu()
+        
     #While loop breaks -> Game closes
     pygame.quit()
 

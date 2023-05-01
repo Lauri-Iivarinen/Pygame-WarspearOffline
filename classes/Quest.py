@@ -1,3 +1,6 @@
+from classes.Player import Player
+from typing import List
+
 class Quest:
 
     def update_count(self, count=1):
@@ -5,8 +8,22 @@ class Quest:
         if self.current_count >= self.object_count:
             self.completed = True
             self.current_count = self.object_count
-
-    def __init__(self, title: str, type: str, information: str, object: str, xp: int, object_count: int, object_target: str, lvl_requirement=1, current_count = 0, completed=False) -> None:
+    
+    def quest_line_completed(self, quests: List[str]):
+        ok = True
+        for quest in self.quest_line:
+            if quest not in quests:
+                ok = False
+        return ok
+    
+    def quest_aivailable(self, player: Player):
+        if len(self.quest_line) == 0 and player.level >= self.lvl_requirement:
+            return True
+        elif player.level >= self.lvl_requirement:
+            return self.quest_line_completed(player.completed_quests)
+        return False
+    
+    def __init__(self, title: str, type: str, information: str, object: str, xp: int, object_count: int, object_target: str, lvl_requirement=1, current_count = 0, completed=False, quest_line = []) -> None:
         self.title = title
         self.type = type
         self.information = information
@@ -17,3 +34,7 @@ class Quest:
         self.object_target = object_target
         self.completed = completed
         self.lvl_requirement = lvl_requirement
+        self.quest_line = quest_line
+    
+    def __repr__(self) -> str:
+        return f'{self.title}, completed: {self.completed}'

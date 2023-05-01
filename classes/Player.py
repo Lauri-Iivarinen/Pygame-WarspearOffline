@@ -9,12 +9,17 @@ items = {
 
 class Player:
 
+    def lvl_up_reward(self):
+        if self.level == 2:
+            self.abilities.append(Ability('Smash', 'dmg', 45, 0, 10, True))
+
     def gain_xp(self, incoming_xp):
         self.xp += incoming_xp
         if self.xp >= self.xp_cap:
             self.xp -= self.xp_cap
             self.level += 1
             self.xp_cap += 10
+            self.lvl_up_reward()
 
     def die(self):
         self.damage = 0
@@ -34,22 +39,33 @@ class Player:
 
     def doAbility(self, ability: Ability):
         if not ability.usable:
-            return
+            return False
         if ability.type == 'heal':
-            self.receive_healing(ability.healing)
+            self.receive_healing(self.calc_healing(ability.healing))
         elif ability.type == 'dmg':
             self.damage_buff = True
             self.damage_buff_amount = ability.damage
         
         ability.used()
+        return True
     
     def useAbility(self, name:str):
         print(name)
         for a in self.abilities:
             if a.name == name:
-                self.doAbility(a)
-                break
+                return self.doAbility(a)
         
+        return False
+
+    def ability_usable(self, name: str):
+        for ability in self.abilities:
+            if ability.name == name:
+                return ability.usable
+        
+        return False
+    
+    def calc_healing(self, heal):
+        return heal + (self.level * 12)
 
     def calc_damage(self):
         damage = items['weapon'].damage + (self.level*10)
@@ -59,6 +75,11 @@ class Player:
             self.damage_buff = False
 
         return damage
+
+    def get_ability(self, name) -> Ability:
+        for ability in self.abilities:
+            if ability.name == name:
+                return ability
 
     def reduce_cooldowns(self):
         for cd in self.abilities:
@@ -73,10 +94,10 @@ class Player:
     def complete_quest(self, quest):
         if quest in self.quests:
             self.quests.remove(quest)
+            self.completed_quests.append(quest.title)
             self.gain_xp(quest.xp)
 
-
-    def __init__(self, name: str, max_health: int, curr_health:int, level: int, xp: int, quests: list, abilities: list, alive=True ):
+    def __init__(self, name: str, max_health: int, curr_health:int, level: int, xp: int, quests: list, abilities: list, alive=True):
         self.name = name
         self.max_health = max_health
         self.curr_health = curr_health
@@ -85,12 +106,13 @@ class Player:
         self.quests = quests
         self.abilities = [
             Ability('Vitalize', 'heal', 0, 35, 5, True),
-            Ability('Slash', 'dmg', 25, 0, 7, True)
+            Ability('Slash', 'dmg', 25, 0, 7, True),
         ]
         self.xp_cap = 100
         self.items = items
         self.alive = alive
         self.damage_buff = False
         self.damage_buff_amount = 0
+        self.completed_quests = []
 
 

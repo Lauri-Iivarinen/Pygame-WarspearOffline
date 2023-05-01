@@ -1,3 +1,6 @@
+from classes.Player import Player
+
+
 class Mob:
 
     def get_name_color(self, hostile):
@@ -5,9 +8,9 @@ class Mob:
             return 'red'
         return 'white'
 
-    def is_aivailable_quests(self, player_lvl):
+    def is_aivailable_quests(self, player: Player):
         for quest in self.quests:
-            if quest.lvl_requirement <= player_lvl:
+            if quest.quest_aivailable(player):
                 return True
         return False
 
@@ -23,11 +26,12 @@ class Mob:
                 self.die()
     
     def quest_accepted(self, quest):
-        index = self.quests.index(quest)
-        self.quests.pop(index)
-        self.quests_in_process.append(quest)
+        self.quests.remove(quest)
+        if quest.type != 'find':
+            self.quests_in_process.append(quest)
+        
 
-    def __init__(self, hostile: bool, max_health: int, curr_health: int, name: str, xp: int, quests: list, x: int, y: int, color, on_speak_text = '', damage=15, alive=True ):
+    def __init__(self, hostile: bool, max_health: int, curr_health: int, name: str, xp: int, quests: list, x: int, y: int, color, on_speak_text = '', damage=15, alive=True, quests_in_process = [] ):
         self.hostile = hostile
         self.max_health = max_health
         self.curr_health = curr_health
@@ -41,4 +45,4 @@ class Mob:
         self.damage = damage
         self.alive = alive
         self.on_speak_text = on_speak_text
-        self.quests_in_process = []
+        self.quests_in_process = quests_in_process
