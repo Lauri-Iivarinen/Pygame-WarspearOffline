@@ -1,3 +1,5 @@
+# Rolling texts in screen for displaying
+# Announcements or combat infor (damage done/taken, healing done)
 class Combat_text:
     def update_pos(self, amount):
         self.y -= amount

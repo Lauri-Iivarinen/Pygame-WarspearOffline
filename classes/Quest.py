@@ -1,6 +1,8 @@
 from classes.Player import Player
 from typing import List
 
+# Quests that friendly npc can give to player
+# completing quests grants rewards currently only xp (experience)
 class Quest:
 
     def update_count(self, count=1):
@@ -9,6 +11,9 @@ class Quest:
             self.completed = True
             self.current_count = self.object_count
     
+    # Checks if questline required for starting the quest
+    # is completed so that the
+    # Quest can be given to the player
     def quest_line_completed(self, quests: List[str]):
         ok = True
         for quest in self.quest_line:

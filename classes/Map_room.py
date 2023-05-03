@@ -2,9 +2,11 @@
 from classes.Mob import Mob
 from classes.Quest import Quest
 
+#Rounds coords given to mobs so they are renders 'inside' a block and not between 2
 def round_coord(num):
     return round(num/40)*40
 
+#Based on this dict, game loads a correct map thats connected to that edge
 connected = {
     '1': {
         'n': 0,
@@ -26,6 +28,7 @@ connected = {
     }
     }
 
+#Defines where player can move and where not
 maps = {
     '1': [
         ['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'],
@@ -83,6 +86,7 @@ maps = {
         ],
 }
 
+#Dict of all quests in the game, key is mob/npc name
 quests = {
     'One Eyed Jack': [
         Quest('Mystery island', 'lvl', 'You need to have more experience.\nExplore the island and get familiar\nwith its creatures. Only then can I tell you about\nthe secret of the island', 'Reach level 5.', 95, 5, '',1,1),
@@ -96,6 +100,8 @@ quests = {
     ]
 }
 
+#Quests that are already marked as in_process,
+#currently applies to finding/talking to certain npc
 in_process = {
     'Henneck' : [
         Quest('Love of my life', 'find', 'Please find my wife, Henneck\nShe is the love of my life.', 'Find Henneck.', 30, 1, 'Henneck',1,0),
@@ -105,6 +111,7 @@ in_process = {
     ]
 }
 
+#All mobs of the game, dict key is map name/number
 mobs = {
     '1': [
         Mob(False, 1000, 1000, 'One Eyed Jack', 0, quests['One Eyed Jack'], round_coord(560), round_coord(450), (100,100,255),'Unagh....\nHello you...\nhave you seen my booze?',200, True, in_process['One Eyed Jack']),
@@ -138,6 +145,7 @@ def getRoom(roomNum):
     return maps[f'{roomNum}']
 
 
+#Class handling currently rendered map+boundaries and all mobs inside it
 class Map_room:
 
     def get_map(self, mapNum):

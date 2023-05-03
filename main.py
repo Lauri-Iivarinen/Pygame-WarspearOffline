@@ -16,17 +16,14 @@ pygame.display.set_caption('Warspear offline')
 PLAYER_WDTH = 20
 PLAYER_HGHT = 50
 PLAYER_VELOCITY = 5
-clock = pygame.time.Clock()
 
+clock = pygame.time.Clock()
 current_map = Map_room(1)
 current_map.print_map()
 #class for rendering the screen
 drawing = Drawing(WINDOW, current_map)
 
-def setDestination(x, y, coords: tuple):
-    if x != coords[0]:
-        print()
-
+# Check if the Pygame window is open
 def checkGameClose():
     for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -34,12 +31,14 @@ def checkGameClose():
 
     return True            
 
-#Offset distance by half the player size to player moves to center of cursor
+# Offset distance by half the player size to player moves to center of cursor
 def getDistance(player_coord, coord, x: bool):
     if x:
         return (player_coord+PLAYER_WDTH/2) - coord
     return (player_coord+45) - coord
 
+# Main movement function, needs a proper algorithm for pathfinding
+# Currently moves first on x axis and then y axis
 def movePlayer(player, distance_X, distance_Y, target, r_click: bool):
     if target and r_click:
         if check_player_range((player.x, player.y), (target.x, target.y)):
@@ -61,30 +60,25 @@ def movePlayer(player, distance_X, distance_Y, target, r_click: bool):
         
     return (distance_X, distance_Y)
 
-#Round cursor position for closest "grid" in the playable area
+# Round cursor position for closest "grid" in the playable area
 def roundCursorPos(cursor: tuple):
     x = round(cursor[0]/40)
     y = round(cursor[1]/40)
     return (x * 40, y * 40)
 
-def move_with_keys(player):
-    #movement test with keyboard
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT] and player.x > 0:
-        player.x -= PLAYER_VELOCITY
-    if keys[pygame.K_RIGHT] and player.x < WINDOW_WDTH-PLAYER_WDTH:
-        player.x += PLAYER_VELOCITY
-
+# Area player clicked is allowed to be moved to in the current map
 def move_ok(cursor: tuple, map):
     x = round(cursor[0]/40)
     y = round(cursor[1]/40)
     return map[y][x]
 
+# Returns the 20x15 grid position
 def map_grid_pos(cursor: tuple):
     x = round(cursor[0]/40)
     y = round(cursor[1]/40)
     return (x,y)
 
+# Check whether or not player clicked on top of a mob
 def check_for_mob(coords: tuple):
     pos = map_grid_pos(coords)
     for mob in current_map.mobs:
@@ -93,6 +87,8 @@ def check_for_mob(coords: tuple):
             return mob
     return False
 
+# Check is mob is close enough so that player can interact with it
+# (talk to / fight)
 def check_player_range(target: tuple, player: tuple) -> bool:
     t = map_grid_pos(target)
     p = map_grid_pos(player)
@@ -103,6 +99,7 @@ def check_player_range(target: tuple, player: tuple) -> bool:
     
     return False
 
+# Check if any quests have progressed further
 def update_quests(player: Player, target=False, type='kill'):
     for quest in player.quests:
         if target:
@@ -117,6 +114,7 @@ def update_quests(player: Player, target=False, type='kill'):
         if quest.type == 'autocomplete' or quest.type == 'find':
             quest.update_count()
 
+# Talk to friendly npc or fight hostile npc
 def do_interact(target: Mob, player, player_info: Player):
     if target.alive:
         close = check_player_range((target.x, target.y), (player.x, player.y))
@@ -135,6 +133,7 @@ def do_interact(target: Mob, player, player_info: Player):
 
     return False
 
+#Check if the conditions for changing the current map have met
 def check_map_change(player):
     grid = map_grid_pos((player.x, player.y))
     if grid[0] == 0:
@@ -151,27 +150,31 @@ def check_map_change(player):
         return ('y', 10)
     return False
 
+# Main function that keeps the game running
 def main():
     tick = 0 #Framerate tick
-    #Player movement
-    destination_X = 0
+
+    #Player movement and interactions
+    destination_X = 0 # Destination where player will head on mouse click
     destination_Y = 0
-    distance_X = 0
+    distance_X = 0 # Distance to destination
     distance_Y = 0
     pos = roundCursorPos((670, 530))
     player = pygame.Rect(pos[0]-10, pos[1]-40, PLAYER_WDTH, PLAYER_HGHT)
+    player_info = Player('Greenmafia', 200, 200, 1, 0, [], []) #PLAYER DATA
+    active_target = False
+    speaking = False
+    old_map = True #Handle map change
+
+    # Cursor and its colors
     cursor = (-60,-60) #Initial position of cursor
     red = (255,0,0)
     green = (0,255,0)
     cursor_color = green
-    player_info = Player('Greenmafia', 200, 200, 1, 0, [], []) #PLAYER DATA
-    active_target = False
     r_click = False
-    speaking = False
-    old_map = True
 
-    #Abilioties
-    gcd_ok = True
+    # Abilities
+    gcd_ok = True #Global cooldown (max 1 ability in ~ 1 second)
     useHeal = False
     useSlash = False
     useSmash = False
@@ -181,25 +184,23 @@ def main():
     menu_closed = False
     new_game = True
 
-    
-
-    # main loop that keeps the game running
+    # Main loop that keeps the game running
     while checkGameClose():
         if in_menu: #Main menu and game not started yet
             mouse = pygame.mouse.get_pressed()
-            if mouse[0]: #Left click moves player
+            if mouse[0]: #Left click
                 cursor = pygame.mouse.get_pos()
                 if cursor[0] >= 75 and cursor[0] <= 175 and cursor[1] >= 130 and cursor[1] <= 180:
                     in_menu = False
                     cursor=pos
-            clock.tick(30)#framerate
+            clock.tick(30)#"framerate", reduces the cycles
             drawing.draw_menu()
-        elif new_game:
+        elif new_game: # Player clicked "Play" in main menu
             drawing.announcement.append(Combat_text('You wake up in an island you have no recollection of...', 'white', 130, 280, 200, 0))
             drawing.announcement.append(Combat_text('What in the world is going on?', 'white', 220, 300, 200, 0))
             drawing.announcement.append(Combat_text('Maybe this drunken sailor knows where I am.', 'white', 160, 320, 200, 0))
             new_game = False
-        elif speaking:#Talking to an npc
+        elif speaking: # Talking to an npc
             mouse = pygame.mouse.get_pressed()
             if mouse[0]:
                 cursor = pygame.mouse.get_pos()
@@ -207,9 +208,9 @@ def main():
                     speaking = False
                     active_target = False
                     cursor=(-60,-60)
-            clock.tick(30)#framerate
+            clock.tick(30) # "framerate"
             drawing.draw(player, cursor, cursor_color, player_info, active_target, speaking)
-        else: #Basic display open
+        else: # Basic display open
             mouse = pygame.mouse.get_pressed()
             if mouse[0] and menu_closed: #Left click moves player
                 cursor = roundCursorPos(pygame.mouse.get_pos())
@@ -224,7 +225,7 @@ def main():
                     if destination_Y != mouse_coords[1]:
                         destination_Y = mouse_coords[1]
                         distance_Y = getDistance(player.y, destination_Y, False)
-                else:
+                else: # Move not allowed
                     cursor_color=red
 
             if mouse[2] and menu_closed: #Right click interacts/attacks
@@ -247,7 +248,7 @@ def main():
                 else:
                     cursor_color=red
                 
-            #ABILITIES
+            # Check for ability usage
             keys = pygame.key.get_pressed()
             if keys[pygame.K_1] and gcd_ok and player_info.ability_usable('Vitalize'):
                 useHeal = True
@@ -265,6 +266,10 @@ def main():
             distance_Y = move[1]
 
             if tick >= 30:
+                # Things that can be updated about once a second
+                # but need to be refreshed constantly
+                # Such as using abilities in that current gcd
+                # or changing map
                 tick = 0
                 menu_closed = True
                 player_info.reduce_cooldowns()

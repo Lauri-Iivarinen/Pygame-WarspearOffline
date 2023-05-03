@@ -1,18 +1,24 @@
 from classes.Item import Item
 from classes.Ability import Ability
 
+# Current items in posession of the player
+# Only weapon stats affect gameplay
 items = {
     'weapon': Item('Broken sword', 10, 15),
     'chest' : Item('Chainmail armor', 20, 0),
     'legs': Item('Rusty chainmail leggings', 15, 0)
 }
 
+# Stats of the player itself, currently does not affect movement, 
+# it needs to be implemented as a superclass later
 class Player:
 
+    #Check if leveling up grants rewards
     def lvl_up_reward(self):
         if self.level == 2:
             self.abilities.append(Ability('Smash', 'dmg', 45, 0, 10, True))
 
+    #Any time player gains xp check for level up
     def gain_xp(self, incoming_xp):
         self.xp += incoming_xp
         if self.xp >= self.xp_cap:
@@ -49,6 +55,7 @@ class Player:
         ability.used()
         return True
     
+    #Find correct ability from the player and use it, could be later turned into dict
     def useAbility(self, name:str):
         print(name)
         for a in self.abilities:
@@ -64,9 +71,11 @@ class Player:
         
         return False
     
+    # Calculate amount of healing done with an ability based on level
     def calc_healing(self, heal):
         return heal + (self.level * 12)
 
+    # Calculate amount of damage done with an ability based on level
     def calc_damage(self):
         damage = items['weapon'].damage + (self.level*10)
         if self.damage_buff:
@@ -114,5 +123,3 @@ class Player:
         self.damage_buff = False
         self.damage_buff_amount = 0
         self.completed_quests = []
-
-
