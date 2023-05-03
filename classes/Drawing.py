@@ -29,8 +29,10 @@ class Drawing:
         title = self.LARGEFONT.render('WARSPER OFFLINE', 1, 'black')
         self.WINDOW.blit(title, (75,75))
         play_frame = pygame.Rect(75, 130, 100, 50)
+        pygame.draw.rect(self.WINDOW, 'black', play_frame, 1)
         play_txt = self.BIGFONT.render('PLAY', 1, 'black')
         self.WINDOW.blit(play_txt, (100,140))
+        #Playguide
         l_guide = self.BIGFONT.render('Move', 1, 'black')
         r_guide = self.BIGFONT.render('Interact/attack', 1, 'black')
         l_click = pygame.transform.scale(pygame.image.load('assets/icons/L_click.png'), (60,60))
@@ -39,17 +41,20 @@ class Drawing:
         self.WINDOW.blit(r_click, (100, 500))
         self.WINDOW.blit(l_guide, (105, 370))
         self.WINDOW.blit(r_guide, (60, 470))
+        abilities = self.BIGFONT.render('Abilities (NUM PAD)', 1, 'black')
+        self.WINDOW.blit(abilities, (300, 370))
+        list = ['Heal', 'Slash', 'Smash']
+        icon_x = 300
+        icon_y = 440
+        for txt in list:
+            icon = pygame.transform.scale(pygame.image.load(f'assets/icons/{txt}.png'), (50,50))
+            self.WINDOW.blit(icon, (icon_x, icon_y))
+            button = self.LARGEFONT.render(f'{list.index(txt)+1}', 1, 'black')
+            self.WINDOW.blit(button, (icon_x+15, 400))
+            ability_name = self.BIGFONT.render(txt, 1, 'black')
+            self.WINDOW.blit(ability_name, (icon_x, icon_y + 60))
+            icon_x += 70
 
-        abilities = self.BIGFONT.render('Abilities', 1, 'black')
-        self.WINDOW.blit(abilities, (285, 370))
-        num_pad_border = pygame.Rect(295, 400, 60,60)
-        pygame.draw.rect(self.WINDOW, 'black', num_pad_border, 1)
-        num = self.BIGFONT.render('NUM', 1, 'black')
-        self.WINDOW.blit(num, (300, 405))
-        pad = self.BIGFONT.render('PAD', 1, 'black')
-        self.WINDOW.blit(pad, (302, 425))
-
-        pygame.draw.rect(self.WINDOW, 'black', play_frame, 1)
         pygame.display.update()
     
     def get_text_pos(self,x,y,length):
