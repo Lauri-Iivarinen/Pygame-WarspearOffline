@@ -7,6 +7,7 @@ https://openart.ai/discovery
 
 Notes
 
+  - Player and mob animations are missing
   - Graphics suck, it wasnt the point :)
   - Pathfinding is bad, it needs an algorithm and has none
   - Play area is small but can be increased easily
