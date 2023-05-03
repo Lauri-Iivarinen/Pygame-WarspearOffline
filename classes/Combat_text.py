@@ -1,5 +1,3 @@
-#Floating combat text that previews damage done healing received
-#can also be used as anouncement base for quest completion etc
 class Combat_text:
     def update_pos(self, amount):
         self.y -= amount

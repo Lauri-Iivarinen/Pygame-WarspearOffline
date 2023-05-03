@@ -1,8 +1,6 @@
 from classes.Player import Player
 
-# All npc:s of the game, they can be hostile or friendly,
-# friendly npcs can be talked to
-# hostile mobs can be killed
+
 class Mob:
 
     def get_name_color(self, hostile):

@@ -4,7 +4,6 @@ from classes.Player import Player
 from classes.Quest import Quest
 from classes.Combat_text import Combat_text
 
-#Main class for rendering what the player sees
 class Drawing:
     WINDOW_WDTH = 800 #20x15 movable area
     WINDOW_HGHT = 600
@@ -21,14 +20,10 @@ class Drawing:
         y = round(cursor[1]/40)
         return (x * 40, y * 40)
 
-    # Means player doesnt wish to view a certain quest 
-    # while talking to an npc 
-    # (goes back to list of quests)
     def clear_opened_quest(self):
         if len(self.open_quest) > 0:
             self.open_quest.pop()
     
-    # Main menu before game is started
     def draw_menu(self):
         self.WINDOW.fill((145,150,50))
         title = self.LARGEFONT.render('WARSPER OFFLINE', 1, 'black')
@@ -62,8 +57,6 @@ class Drawing:
         x -= length*3
         return (x,y)
     
-    # Shows if npc has quests aivailable or 
-    # ready to be completed
     def get_quest_icon(self, mob: Mob, player: Player) -> str:
         quests = self.get_completed_quests(mob, player)
         if len(quests) > 0:
@@ -101,7 +94,6 @@ class Drawing:
             self.WINDOW.blit(npc, (npc_pos[0]-10, npc_pos[1]))
     
 
-    #Top left corner, health, playername, xp
     def draw_UI(self,player: Player):
         bg = pygame.Rect(0,0,150,60)
         pygame.draw.rect(self.WINDOW, (255,215,128), bg)
@@ -119,6 +111,8 @@ class Drawing:
         level = self.FONT.render(f'{player.level}', 1, 'black')
         self.WINDOW.blit(name, (5,5))
         self.WINDOW.blit(level, (125,15))
+        #BG (255,215,128)
+        #frame (194, 132, 0)
 
 
     def draw_target_UI(self,player: Mob):
@@ -162,7 +156,6 @@ class Drawing:
             self.WINDOW.blit(name, (x,552))
             x += 50
 
-    #Big annnouncements such as quest completed
     def draw_announcement(self):
         for txt in self.announcement:
             text = self.BIGFONT.render(txt.txt, 1, txt.color)
@@ -171,7 +164,6 @@ class Drawing:
             if txt.lifetime <= 0:
                 self.announcement.remove(txt)
 
-    #Draw all damage + healing floating combat texts 
     def draw_combat_text(self):
         for txt in self.combat_txt:
             text = self.FONT.render(txt.txt, 1, txt.color)
@@ -239,7 +231,6 @@ class Drawing:
                     quests.append(player_quest)
         return quests
 
-    #Base frame for talking to an npc
     def draw_text_box(self,target: Mob, player: Player):
         text_x = 260
         text_y = 110
@@ -249,14 +240,12 @@ class Drawing:
         pygame.draw.rect(self.WINDOW, (194, 132, 0), frame, 4)
         completed_quests = self.get_completed_quests(target, player)
 
-        # Make initial 'icebreaker' the npc has 3 lines so it always looks the same
         txt = target.on_speak_text.split('\n')
         for str in txt:
             greeting = self.FONT.render(str, 1, 'black')
             self.WINDOW.blit(greeting, (text_x,text_y))
             text_y += 15
 
-        # Opens quest completion screen if quest can be completed by the npc
         if len(completed_quests) > 0:
             mouse = pygame.mouse.get_pressed()
             y = 10+text_y
@@ -283,7 +272,6 @@ class Drawing:
                 if cursor[0] >= text_x+10 and cursor[0] <= text_x+80 and cursor[1] >= 390 and cursor[1] <= 430:#accept button
                     self.accept_quest(player, target)
             if len(self.open_quest) == 0:
-                # Show the normal list of quests aivailable
                 for quest in quests:
                     if cursor[0] >= text_x and cursor[0] <= text_x+280 and cursor[1]>=y and cursor[1] <= y+50:
                         self.open_quest.append(quest)
@@ -294,8 +282,6 @@ class Drawing:
                     self.WINDOW.blit(object, (text_x+10, y+10))
                     y += 60
             else:
-                # Preview for the quest the 
-                # player clicked in the questslist
                 self.draw_opened_quest(self.open_quest[0], (0,0), player, text_x, y, False, target)
 
     def draw_quest_tracker(self,player: Player):
@@ -322,7 +308,7 @@ class Drawing:
             y += 25
 
 
-    # Main function to draw a single frame
+        # draw a single frame
     def draw(self,player, cursor, cursor_color, player_info: Player, active_target, speaking: bool, accepting_quest=False):
         BG = pygame.image.load(f'assets/background/map{self.map.map_num}.png')
         self.WINDOW.blit(BG, (0,0))
@@ -336,6 +322,7 @@ class Drawing:
         self.draw_combat_text()
         self.draw_announcement()
         self.draw_quest_tracker(player_info)
+        #pygame.draw.rect(self.WINDOW, (255,255,255), player)#Player model
         play = pygame.transform.scale(pygame.image.load('assets/mobs/Player.png'), (self.PLAYER_WDTH, self.PLAYER_HGHT))
         self.WINDOW.blit(play, (player.x, player.y))
         if speaking and active_target:

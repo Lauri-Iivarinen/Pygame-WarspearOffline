@@ -1,10 +1,3 @@
-
-"""
-
-Deprecated
-
-"""
-
 import pygame
 pygame.font.init()
 FONT = pygame.font.SysFont('comicsans', 35, True, italic=False)
