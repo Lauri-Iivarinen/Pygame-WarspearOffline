@@ -178,16 +178,18 @@ class Map_room:
             self.mobs = getMobs(num)
             self.connected = connected[f'{num}']
             self.map_num = num
-        pass
+        
+        self.print_map()
 
     def print_map(self):
+        print('Current map layout:')
         for i in self.map:
             string = ''
             for a in i:
                 if a:
-                    string += ' '
+                    string += '  '
                 else:
-                    string += 'X'
+                    string += 'X '
             print(string)
 
 
