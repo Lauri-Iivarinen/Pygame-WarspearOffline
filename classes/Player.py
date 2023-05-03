@@ -114,7 +114,7 @@ class Player:
         self.xp = xp
         self.quests = quests
         self.abilities = [
-            Ability('Vitalize', 'heal', 0, 35, 5, True),
+            Ability('Heal', 'heal', 0, 35, 5, True),
             Ability('Slash', 'dmg', 25, 0, 7, True),
         ]
         self.xp_cap = 100

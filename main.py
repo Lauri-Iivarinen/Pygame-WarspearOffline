@@ -250,7 +250,7 @@ def main():
                 
             # Check for ability usage
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_1] and gcd_ok and player_info.ability_usable('Vitalize'):
+            if keys[pygame.K_1] and gcd_ok and player_info.ability_usable('Heal'):
                 useHeal = True
                 gcd_ok = False
             if keys[pygame.K_2] and gcd_ok and player_info.ability_usable('Slash'):
@@ -287,8 +287,8 @@ def main():
                 if active_target:
                     speaking = do_interact(active_target, player, player_info)
                 if useHeal:
-                    if player_info.useAbility('Vitalize'):
-                        heal = player_info.get_ability('Vitalize')
+                    if player_info.useAbility('Heal'):
+                        heal = player_info.get_ability('Heal')
                         drawing.combat_txt.append(Combat_text(f'{player_info.calc_healing(heal.healing)}', 'green', player.x, player.y))
                         useHeal = False
                         gcd_ok = True

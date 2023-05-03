@@ -34,8 +34,10 @@ class Drawing:
         title = self.LARGEFONT.render('WARSPER OFFLINE', 1, 'black')
         self.WINDOW.blit(title, (75,75))
         play_frame = pygame.Rect(75, 130, 100, 50)
+        pygame.draw.rect(self.WINDOW, 'black', play_frame, 1)
         play_txt = self.BIGFONT.render('PLAY', 1, 'black')
         self.WINDOW.blit(play_txt, (100,140))
+        #Playguide
         l_guide = self.BIGFONT.render('Move', 1, 'black')
         r_guide = self.BIGFONT.render('Interact/attack', 1, 'black')
         l_click = pygame.transform.scale(pygame.image.load('assets/icons/L_click.png'), (60,60))
@@ -44,17 +46,21 @@ class Drawing:
         self.WINDOW.blit(r_click, (100, 500))
         self.WINDOW.blit(l_guide, (105, 370))
         self.WINDOW.blit(r_guide, (60, 470))
+        abilities = self.BIGFONT.render('Abilities (NUM PAD)', 1, 'black')
+        self.WINDOW.blit(abilities, (300, 370))
+        list = ['Heal', 'Slash', 'Smash']
+        icon_x = 300
+        icon_y = 440
+        for txt in list:
+            icon = pygame.transform.scale(pygame.image.load(f'assets/icons/{txt}.png'), (50,50))
+            self.WINDOW.blit(icon, (icon_x, icon_y))
+            button = self.LARGEFONT.render(f'{list.index(txt)+1}', 1, 'black')
+            self.WINDOW.blit(button, (icon_x+15, 400))
+            ability_name = self.BIGFONT.render(txt, 1, 'black')
+            self.WINDOW.blit(ability_name, (icon_x, icon_y + 60))
+            icon_x += 70
 
-        abilities = self.BIGFONT.render('Abilities', 1, 'black')
-        self.WINDOW.blit(abilities, (285, 370))
-        num_pad_border = pygame.Rect(295, 400, 60,60)
-        pygame.draw.rect(self.WINDOW, 'black', num_pad_border, 1)
-        num = self.BIGFONT.render('NUM', 1, 'black')
-        self.WINDOW.blit(num, (300, 405))
-        pad = self.BIGFONT.render('PAD', 1, 'black')
-        self.WINDOW.blit(pad, (302, 425))
-
-        pygame.draw.rect(self.WINDOW, 'black', play_frame, 1)
+        
         pygame.display.update()
     
     def get_text_pos(self,x,y,length):
@@ -103,36 +109,44 @@ class Drawing:
 
     #Top left corner, health, playername, xp
     def draw_UI(self,player: Player):
-        bg = pygame.Rect(0,0,150,60)
+        bg = pygame.Rect(0,0,153,65)
         pygame.draw.rect(self.WINDOW, (255,215,128), bg)
         pygame.draw.rect(self.WINDOW, (194, 132, 0), bg, 2)
         name = self.FONT.render(player.name, 1, 'black')
-        health_bar_frame = pygame.Rect(3,25, 102, 7)
+        health_bar_frame = pygame.Rect(3,25, 102, 20)
         pygame.draw.rect(self.WINDOW, 'black', health_bar_frame)
-        health_bar = pygame.Rect(4,26, round((player.curr_health/player.max_health)*100), 5)
+        health_bar = pygame.Rect(4,26, round((player.curr_health/player.max_health)*100), 18)
         pygame.draw.rect(self.WINDOW, 'red', health_bar)
-        xp_bar_frame = pygame.Rect(3,33, 102, 7)
+        xp_bar_frame = pygame.Rect(3,48, 102, 7)
         pygame.draw.rect(self.WINDOW, 'black', xp_bar_frame)
-        xp_bar = pygame.Rect(4,34, round((player.xp/player.xp_cap)*100), 5)
+        xp_bar = pygame.Rect(4,49, round((player.xp/player.xp_cap)*100), 5)
         pygame.draw.rect(self.WINDOW, 'yellow', xp_bar)
         pygame.draw.circle(self.WINDOW, 'black', (128,25), self.CURSOR_SIZE, self.CURSOR_THICKNESS)
         level = self.FONT.render(f'{player.level}', 1, 'black')
         self.WINDOW.blit(name, (5,5))
         self.WINDOW.blit(level, (125,15))
+<<<<<<< HEAD
+=======
+        hp_count = f'{player.curr_health}/{player.max_health}'
+        hp_txt = self.FONT.render(hp_count, 1, 'black')
+        self.WINDOW.blit(hp_txt, (5, 25))
+        #BG (255,215,128)
+        #frame (194, 132, 0)
+>>>>>>> 92750f43c444bc0377ca7ed4e6111f949b80d8ef
 
 
-    def draw_target_UI(self,player: Mob):
-        bg = pygame.Rect(160,0,150,60)
+    def draw_target_UI(self, player: Mob):
+        bg = pygame.Rect(160,0,130,50)
         pygame.draw.rect(self.WINDOW, (255,215,128), bg)
         pygame.draw.rect(self.WINDOW, (194, 132, 0), bg, 2)
         name = self.FONT.render(player.name, 1, 'black')
         hp_txt = self.FONT.render(f'{player.curr_health}/{player.max_health}', 1, 'black')
-        health_bar_frame = pygame.Rect(163,25, 102, 7)
+        health_bar_frame = pygame.Rect(170,25, 102, 20)
         pygame.draw.rect(self.WINDOW, 'black', health_bar_frame)
-        health_bar = pygame.Rect(164,26, round((player.curr_health/player.max_health)*100), 5)
+        health_bar = pygame.Rect(171,26, round((player.curr_health/player.max_health)*100), 18)
         pygame.draw.rect(self.WINDOW, 'red', health_bar)
-        self.WINDOW.blit(name, (162,5))
-        self.WINDOW.blit(hp_txt, (165, 32))
+        self.WINDOW.blit(name, (170,5))
+        self.WINDOW.blit(hp_txt, (175, 25))
 
 
     def draw_ability_bar(self,abilities: list):
@@ -140,7 +154,7 @@ class Drawing:
         y = 550
         bg = pygame.Rect(x,y,300,50)
         #pygame.draw.rect(self.WINDOW, (255,215,128), bg)
-        pygame.draw.rect(self.WINDOW, (194, 132, 0), bg, 2)
+        pygame.draw.rect(self.WINDOW, (194, 132, 0), bg, 3)
         y += 15
         x += 10
         for ability in abilities:
@@ -195,21 +209,21 @@ class Drawing:
             self.WINDOW.blit(information, (x+10,txt_y))
             txt_y += 10
         object = self.SMALLFONT.render(quest.object, 1, 'black')
-        self.WINDOW.blit(object, (x+10, 370))
+        self.WINDOW.blit(object, (x+10, 420))
         if completing_quest:
-            txt_frame = pygame.Rect(x+10,390,70,40)
+            txt_frame = pygame.Rect(x+10,440,70,40)
             pygame.draw.rect(self.WINDOW, 'black', txt_frame, 1)
             object = self.FONT.render('Complete', 1, 'black')
-            self.WINDOW.blit(object, (x+15,400))
+            self.WINDOW.blit(object, (x+15,450))
         else:
-            txt_frame = pygame.Rect(x+10,390,70,40)
+            txt_frame = pygame.Rect(x+10,440,70,40)
             pygame.draw.rect(self.WINDOW, 'black', txt_frame, 1)
             object = self.FONT.render('Accept', 1, 'black')
-            dcl_frame = pygame.Rect(x+90,390,70,40)
+            dcl_frame = pygame.Rect(x+90,440,70,40)
             pygame.draw.rect(self.WINDOW, 'black', dcl_frame, 1)
             decline = self.FONT.render('Decline', 1, 'black')
-            self.WINDOW.blit(object, (x+15,400))
-            self.WINDOW.blit(decline, (x+95, 400))
+            self.WINDOW.blit(object, (x+15,450))
+            self.WINDOW.blit(decline, (x+95, 450))
     
 
     def get_quests(self,target: Mob, player: Player):
@@ -248,24 +262,35 @@ class Drawing:
         frame = pygame.Rect(250, 100, 300, 400)
         pygame.draw.rect(self.WINDOW, (194, 132, 0), frame, 4)
         completed_quests = self.get_completed_quests(target, player)
+<<<<<<< HEAD
 
         # Make initial 'icebreaker' the npc has 3 lines so it always looks the same
+=======
+        
+>>>>>>> 92750f43c444bc0377ca7ed4e6111f949b80d8ef
         txt = target.on_speak_text.split('\n')
         for str in txt:
             greeting = self.FONT.render(str, 1, 'black')
             self.WINDOW.blit(greeting, (text_x,text_y))
             text_y += 15
+<<<<<<< HEAD
 
         # Opens quest completion screen if quest can be completed by the npc
+=======
+        text_y += 20
+        quest_text = self.BIGFONT.render('Quests:', 1, 'black')
+        self.WINDOW.blit(quest_text, (text_x+5, text_y))
+        text_y += 20
+>>>>>>> 92750f43c444bc0377ca7ed4e6111f949b80d8ef
         if len(completed_quests) > 0:
             mouse = pygame.mouse.get_pressed()
             y = 10+text_y
             self.draw_opened_quest(completed_quests[0], (0,0), player, text_x, 10+text_y, True, target)
             if mouse[0]:
                 cursor = pygame.mouse.get_pos()
-                if cursor[0] >= text_x and cursor[0] <= text_x+280 and cursor[1] >= 450 and cursor[1] <= 500:
-                    self.clear_opened_quest()
-                if cursor[0] >= text_x+10 and cursor[0] <= text_x+80 and cursor[1] >= 390 and cursor[1] <= 430:#accept button
+                #if cursor[0] >= text_x and cursor[0] <= text_x+280 and cursor[1] >= 450 and cursor[1] <= 500:
+                    #self.clear_opened_quest()
+                if cursor[0] >= text_x+10 and cursor[0] <= text_x+80 and cursor[1] >= 440 and cursor[1] <= 480:#complete button
                     player.complete_quest(completed_quests[0])
                     self.announcement.append(Combat_text('Quest completed', 'white', 300, 75))
         else:
@@ -276,11 +301,11 @@ class Drawing:
             y = 10+text_y
             if mouse[0]:
                 cursor = pygame.mouse.get_pos()
-                if cursor[0] >= text_x and cursor[0] <= text_x+280 and cursor[1] >= 450 and cursor[1] <= 500:
+                #if cursor[0] >= text_x and cursor[0] <= text_x+280 and cursor[1] >= 450 and cursor[1] <= 500:
+                    #self.clear_opened_quest()
+                if cursor[0] >= text_x+90 and cursor[0] <= text_x+160 and cursor[1] >= 440 and cursor[1] <= 480:#decline button
                     self.clear_opened_quest()
-                if cursor[0] >= text_x+90 and cursor[0] <= text_x+160 and cursor[1] >= 390 and cursor[1] <= 430:#decline button
-                    self.clear_opened_quest()
-                if cursor[0] >= text_x+10 and cursor[0] <= text_x+80 and cursor[1] >= 390 and cursor[1] <= 430:#accept button
+                if cursor[0] >= text_x+10 and cursor[0] <= text_x+80 and cursor[1] >= 440 and cursor[1] <= 480:#accept button
                     self.accept_quest(player, target)
             if len(self.open_quest) == 0:
                 # Show the normal list of quests aivailable
