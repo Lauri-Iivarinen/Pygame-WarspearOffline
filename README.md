@@ -33,7 +33,11 @@ TODO
 
 # Images
 
-![kuva1](https://user-images.githubusercontent.com/94760484/236049349-09045566-02c8-4e84-ade5-935b25ee8bba.PNG)
+New player model + background
+
+![updatedPygame](https://user-images.githubusercontent.com/94760484/236540634-9791808e-9be0-4838-b7ba-fab4936faf47.PNG)
+
+OLD PLAYERMODEL AND BACKGROUND BUT EVERYTHING ELSE IS SAME
 
 ![kuva2](https://user-images.githubusercontent.com/94760484/236049310-59be799f-0f7f-4f99-bd9c-5aafdbc517f0.PNG)
 
